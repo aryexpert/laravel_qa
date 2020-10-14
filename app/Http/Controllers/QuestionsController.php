@@ -20,16 +20,19 @@ class QuestionsController extends Controller
     public function index()
     {
         $questions = Question::with('user')->latest()->paginate(3);
+
         return view('questions.index', compact('questions'));
     }
 
     /**
      * Show the form for creating a new resource.
+     *
      * @return \Illuminate\Http\Response
      */
     public function create()
     {
         $question = new Question();
+
         return view('questions.create', compact('question'));
     }
 
@@ -41,8 +44,8 @@ class QuestionsController extends Controller
      */
     public function store(AskQuestionRequest $request)
     {
-        $request->user()->questions()->create($request->only('title','body'));
-        return redirect()->route('questions.index')->with('success', "Your question has been submited");
+        $request->user()->questions()->create($request->only('title', 'body'));
+        return redirect()->route('questions.index')->with('success', "Your question has been submitted");
     }
 
     /**
@@ -54,6 +57,7 @@ class QuestionsController extends Controller
     public function show(Question $question)
     {
         $question->increment('views');
+
         return view('questions.show', compact('question'));
     }
 
@@ -78,9 +82,18 @@ class QuestionsController extends Controller
      */
     public function update(AskQuestionRequest $request, Question $question)
     {
-        $question->update($request->only('title', 'body'));
         $this->authorize("update", $question);
+
         $question->update($request->only('title', 'body'));
+
+        if ($request->expectsJson())
+        {
+            return response()->json([
+                'message' => "Your question has been updated.",
+                'body_html' => $question->body_html
+            ]);
+        }
+
         return redirect('/questions')->with('success', "Your question has been updated.");
     }
 
@@ -93,7 +106,16 @@ class QuestionsController extends Controller
     public function destroy(Question $question)
     {
         $this->authorize("delete", $question);
+
         $question->delete();
-        return redirect('/questions')->with('success', "Your Question has been deleted.");
+
+        if (request()->expectsJson())
+        {
+            return response()->json([
+                'message' => "Your question has been deleted."
+            ]);
+        }
+
+        return redirect('/questions')->with('success', "Your question has been deleted.");
     }
 }
