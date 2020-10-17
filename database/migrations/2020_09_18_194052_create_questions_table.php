@@ -31,6 +31,10 @@ class CreateQuestionsTable extends Migration
     }
 
     /**
+     *   $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+    $table->foreign('best_answer_id')->references('id')->on('answers')->onDelete('SET NULL');
+    $table->unsignedBigInteger('user_id');
+    $table->unsignedBigInteger('best_answer_id')->nullable();
      * Reverse the migrations.
      *
      * @return void
